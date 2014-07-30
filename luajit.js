@@ -1,2 +1,2 @@
 
-module.expoers = require('bindings');
+module.exports = require('bindings')('bindings');
