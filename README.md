@@ -49,8 +49,8 @@ Both methods compiles and run the code. When this is done the callback is called
 In case of errors (compile or runtime) the first argument in the callback will
 be an error object, otherwise it is `null`.
 
-* `LuaState.doFile(filepath, callback)` - Wraps `luaL_dofile`
-* `LuaState.doString(code, callback)` - Wraps `luaL_dostring`
+* `LuaState.doFile(filepath, callback)` - Wraps `luaL_dofile`.
+* `LuaState.doString(code, callback)` - Wraps `luaL_dostring`.
 
 ### Stack Operators
 
