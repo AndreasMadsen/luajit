@@ -27,6 +27,15 @@ state.close();
 print("Hallo from Lua")
 ```
 
+### Install
+
+This module is not yet published, but you can of cause clone it:
+```shell
+git clone https://github.com/AndreasMadsen/luajit.git
+cd luajit
+npm install
+```
+
 ## API
 
 You create a new state with:
