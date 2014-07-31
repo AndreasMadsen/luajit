@@ -36,6 +36,9 @@ class LuaState : public node::ObjectWrap {
         static NAN_METHOD(Push);
         static NAN_METHOD(GetTop);
         static NAN_METHOD(SetTop);
+        static NAN_METHOD(PushValue);
+        static NAN_METHOD(Remove);
+        static NAN_METHOD(Insert);
         static NAN_METHOD(Replace);
 };
 

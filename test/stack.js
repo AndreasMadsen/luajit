@@ -140,25 +140,161 @@ test('stack gettop', function (t) {
 });
 
 test('stack settop', function (t) {
-    var state = new luajit.LuaState();
-    state.push(true);
-    state.setTop(2);
-    t.strictEqual(state.read(-1), null);
-    t.strictEqual(state.read(-2), true);
-    state.setTop(1);
-    t.strictEqual(state.read(-1), true);
-    state.close();
+    t.test('- no argument', function (t) {
+        var state = new luajit.LuaState();
+        var error = null;
+        try {
+            state.setTop();
+        } catch (e) { error = e; }
+        t.equal(error.name, 'TypeError');
+        t.equal(error.message, 'LuaState.setTop first argument must be a number');
+        state.close();
+        t.end();
+    });
+
+    t.test('- simple', function (t) {
+        var state = new luajit.LuaState();
+        state.push(true);
+        state.setTop(2);
+        t.strictEqual(state.read(-1), null);
+        t.strictEqual(state.read(-2), true);
+        state.setTop(1);
+        t.strictEqual(state.read(-1), true);
+        state.close();
+        t.end();
+    });
+
+    t.end();
+});
+
+test('stack pushValue', function (t) {
+    t.test('- no argument', function (t) {
+        var state = new luajit.LuaState();
+        var error = null;
+        try {
+            state.pushValue();
+        } catch (e) { error = e; }
+        t.equal(error.name, 'TypeError');
+        t.equal(error.message, 'LuaState.pushValue first argument must be a number');
+        state.close();
+        t.end();
+    });
+
+    t.test('- simple', function (t) {
+        var state = new luajit.LuaState();
+        state.push(1);
+        state.pushValue(1);
+        t.strictEqual(state.read(-1), 1);
+        t.strictEqual(state.read(-2), 1);
+        state.close();
+        t.end();
+    });
+
+    t.end();
+});
+
+test('stack remove', function (t) {
+    t.test('- no argument', function (t) {
+        var state = new luajit.LuaState();
+        var error = null;
+        try {
+            state.remove();
+        } catch (e) { error = e; }
+        t.equal(error.name, 'TypeError');
+        t.equal(error.message, 'LuaState.remove first argument must be a number');
+        state.close();
+        t.end();
+    });
+
+    t.test('- negative number', function (t) {
+        var state = new luajit.LuaState();
+        var error = null;
+        try {
+            state.remove(-1);
+        } catch (e) { error = e; }
+        t.equal(error.name, 'RangeError');
+        t.equal(error.message, 'LuaState.remove first argument must be positive');
+        state.close();
+        t.end();
+    });
+
+    t.test('- simple', function (t) {
+        var state = new luajit.LuaState();
+        state.push(1);
+        state.push(2);
+        state.remove(2);
+        t.strictEqual(state.read(-1), 1);
+        t.strictEqual(state.getTop(), 1);
+        state.close();
+        t.end();
+    });
+
+    t.end();
+});
+
+test('stack insert', function (t) {
+    t.test('- no argument', function (t) {
+        var state = new luajit.LuaState();
+        var error = null;
+        try {
+            state.insert();
+        } catch (e) { error = e; }
+        t.equal(error.name, 'TypeError');
+        t.equal(error.message, 'LuaState.insert first argument must be a number');
+        state.close();
+        t.end();
+    });
+
+    t.test('- negative number', function (t) {
+        var state = new luajit.LuaState();
+        var error = null;
+        try {
+            state.insert(-1);
+        } catch (e) { error = e; }
+        t.equal(error.name, 'RangeError');
+        t.equal(error.message, 'LuaState.insert first argument must be positive');
+        state.close();
+        t.end();
+    });
+
+    t.test('- simple', function (t) {
+        var state = new luajit.LuaState();
+        state.push(1);
+        state.push(2);
+        state.insert(1);
+        t.strictEqual(state.read(-1), 1);
+        t.strictEqual(state.read(-2), 2);
+        state.close();
+        t.end();
+    });
+
     t.end();
 });
 
 test('stack replace', function (t) {
-    var state = new luajit.LuaState();
-    state.push(1);
-    state.push(2);
-    state.push(3);
-    state.replace(1);
-    t.strictEqual(state.read(-1), 2);
-    t.strictEqual(state.read(-2), 3);
-    state.close();
+    t.test('- no argument', function (t) {
+        var state = new luajit.LuaState();
+        var error = null;
+        try {
+            state.replace();
+        } catch (e) { error = e; }
+        t.equal(error.name, 'TypeError');
+        t.equal(error.message, 'LuaState.replace first argument must be a number');
+        state.close();
+        t.end();
+    });
+
+    t.test('- simple', function (t) {
+        var state = new luajit.LuaState();
+        state.push(1);
+        state.push(2);
+        state.push(3);
+        state.replace(1);
+        t.strictEqual(state.read(-1), 2);
+        t.strictEqual(state.read(-2), 3);
+        state.close();
+        t.end();
+    });
+
     t.end();
 });

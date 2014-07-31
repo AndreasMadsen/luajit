@@ -38,6 +38,9 @@ void LuaState::Init (v8::Handle<v8::Object> target) {
     NODE_SET_PROTOTYPE_METHOD(tpl, "pop", LuaState::Pop);
     NODE_SET_PROTOTYPE_METHOD(tpl, "setTop", LuaState::SetTop);
     NODE_SET_PROTOTYPE_METHOD(tpl, "getTop", LuaState::GetTop);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "pushValue", LuaState::PushValue);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "remove", LuaState::Remove);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "insert", LuaState::Insert);
     NODE_SET_PROTOTYPE_METHOD(tpl, "replace", LuaState::Replace);
 
     // Export class constructor
@@ -193,7 +196,7 @@ NAN_METHOD(LuaState::SetTop) {
     NanScope();
 
     if (args.Length() < 1 || !args[0]->IsNumber()) {
-        v8::ThrowException(NanTypeError("LuaState.replace first argument must be a number"));
+        v8::ThrowException(NanTypeError("LuaState.setTop first argument must be a number"));
     } else {
         int index = (int)args[0]->ToNumber()->Value();
 
@@ -204,12 +207,61 @@ NAN_METHOD(LuaState::SetTop) {
     NanReturnUndefined();
 }
 
+NAN_METHOD(LuaState::PushValue) {
+    NanScope();
+
+    if (args.Length() < 1 || !args[0]->IsNumber()) {
+        v8::ThrowException(NanTypeError("LuaState.pushValue first argument must be a number"));
+    } else {
+        int index = (int)args[0]->ToNumber()->Value();
+
+        LuaState* obj = node::ObjectWrap::Unwrap<LuaState>(args.This());
+        lua_pushvalue(obj->L, index);
+    }
+
+    NanReturnUndefined();
+}
+
+NAN_METHOD(LuaState::Remove) {
+    NanScope();
+
+    if (args.Length() < 1 || !args[0]->IsNumber()) {
+        v8::ThrowException(NanTypeError("LuaState.remove first argument must be a number"));
+    } else {
+        int index = (int)args[0]->ToNumber()->Value();
+        if (index < 0) {
+            v8::ThrowException(NanRangeError("LuaState.remove first argument must be positive"));
+        } else {
+            LuaState* obj = node::ObjectWrap::Unwrap<LuaState>(args.This());
+            lua_remove(obj->L, index);
+        }
+    }
+
+    NanReturnUndefined();
+}
+
+NAN_METHOD(LuaState::Insert) {
+    NanScope();
+
+    if (args.Length() < 1 || !args[0]->IsNumber()) {
+        v8::ThrowException(NanTypeError("LuaState.insert first argument must be a number"));
+    } else {
+        int index = (int)args[0]->ToNumber()->Value();
+        if (index < 0) {
+            v8::ThrowException(NanRangeError("LuaState.insert first argument must be positive"));
+        } else {
+            LuaState* obj = node::ObjectWrap::Unwrap<LuaState>(args.This());
+            lua_insert(obj->L, index);
+        }
+    }
+
+    NanReturnUndefined();
+}
+
 NAN_METHOD(LuaState::Replace) {
     NanScope();
 
-    if (args.Length() < 1) {
-        v8::ThrowException(NanTypeError("LuaState.replace requires 1 argument"));
-    } else if (!args[0]->IsNumber()) {
+    if (args.Length() < 1 || !args[0]->IsNumber()) {
         v8::ThrowException(NanTypeError("LuaState.replace first argument must be a number"));
     } else {
         int index = (int)args[0]->ToNumber()->Value();
