@@ -19,10 +19,24 @@ class LuaState : public node::ObjectWrap {
         ~LuaState();
 
         lua_State* L;
+        bool isclosed;
 
     private:
+        // Initialize and close
         static NAN_METHOD(New);
-        static NAN_METHOD(doFile);
+        static NAN_METHOD(Close);
+
+        // Compile methods
+        static NAN_METHOD(DoFile);
+        static NAN_METHOD(DoString);
+
+        // Stack modifiers
+        static NAN_METHOD(Read);
+        static NAN_METHOD(Pop);
+        static NAN_METHOD(Push);
+        static NAN_METHOD(GetTop);
+        static NAN_METHOD(SetTop);
+        static NAN_METHOD(Replace);
 };
 
 #endif

@@ -15,7 +15,10 @@
                 }]
             ],
             'sources': [
+                'src/async.cpp',
+                'src/baton.cpp',
                 'src/lua_state.cpp',
+                'src/lua_utils.cpp',
                 'src/luajit.cpp'
             ],
             'include_dirs': [
