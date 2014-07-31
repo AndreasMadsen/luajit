@@ -80,11 +80,9 @@ void do_file(uv_work_t* req) {
 NAN_METHOD(LuaState::DoFile) {
     NanScope();
 
-    if (args.Length() < 1) {
-        v8::ThrowException(NanTypeError("LuaState.doFile requires 2 arguments"));
-    } else if (!args[0]->IsString()) {
+    if (args.Length() < 1 || !args[0]->IsString()) {
         v8::ThrowException(NanTypeError("LuaState.doFile first argument must be a string"));
-    } else if (!args[1]->IsFunction()) {
+    } else if (args.Length() < 2 || !args[1]->IsFunction()) {
         v8::ThrowException(NanTypeError("LuaState.doFile second argument must be a function"));
     } else {
         Baton* baton = new Baton(args);
@@ -108,11 +106,9 @@ void do_string(uv_work_t* req) {
 NAN_METHOD(LuaState::DoString) {
     NanScope();
 
-    if (args.Length() < 1) {
-        v8::ThrowException(NanTypeError("LuaState.doString requires 2 arguments"));
-    } else if (!args[0]->IsString()) {
+    if (args.Length() < 1 || !args[0]->IsString()) {
         v8::ThrowException(NanTypeError("LuaState.doString first argument must be a string"));
-    } else if (!args[1]->IsFunction()) {
+    } else if (args.Length() < 2 || !args[1]->IsFunction()) {
         v8::ThrowException(NanTypeError("LuaState.doString second argument must be a function"));
     } else {
         Baton* baton = new Baton(args);
@@ -126,7 +122,7 @@ NAN_METHOD(LuaState::DoString) {
 }
 
 //
-// Stack modifiers
+// Stack operators
 //
 NAN_METHOD(LuaState::Read) {
     NanScope();
@@ -159,7 +155,7 @@ NAN_METHOD(LuaState::Push) {
         LuaState* obj = node::ObjectWrap::Unwrap<LuaState>(args.This());
         push_v8_to_lua(obj->L, args[0], &supportedType);
         if (!supportedType) {
-            v8::ThrowException(NanTypeError("LuaState.push couldn't convert first argument to lua"));
+            v8::ThrowException(NanTypeError("LuaState.push couldn't convert argument to lua"));
         }
     }
 
@@ -169,15 +165,16 @@ NAN_METHOD(LuaState::Push) {
 NAN_METHOD(LuaState::Pop) {
     NanScope();
 
-    if (args.Length() < 1) {
-        v8::ThrowException(NanTypeError("LuaState.replace requires 1 argument"));
-    } else if (!args[0]->IsNumber()) {
-        v8::ThrowException(NanTypeError("LuaState.replace first argument must be a number"));
+    if (args.Length() < 1 || !args[0]->IsNumber()) {
+        v8::ThrowException(NanTypeError("LuaState.pop first argument must be a number"));
     } else {
-        int index = (int)args[0]->ToNumber()->Value();
-
-        LuaState* obj = node::ObjectWrap::Unwrap<LuaState>(args.This());
-        lua_pop(obj->L, index);
+        int num = (int)args[0]->ToNumber()->Value();
+        if (num < 0) {
+            v8::ThrowException(NanRangeError("LuaState.pop first argument must be positive"));
+        } else {
+            LuaState* obj = node::ObjectWrap::Unwrap<LuaState>(args.This());
+            lua_pop(obj->L, num);
+        }
     }
 
     NanReturnUndefined();
@@ -195,9 +192,7 @@ NAN_METHOD(LuaState::GetTop) {
 NAN_METHOD(LuaState::SetTop) {
     NanScope();
 
-    if (args.Length() < 1) {
-        v8::ThrowException(NanTypeError("LuaState.replace requires 1 argument"));
-    } else if (!args[0]->IsNumber()) {
+    if (args.Length() < 1 || !args[0]->IsNumber()) {
         v8::ThrowException(NanTypeError("LuaState.replace first argument must be a number"));
     } else {
         int index = (int)args[0]->ToNumber()->Value();

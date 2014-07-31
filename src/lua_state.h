@@ -30,7 +30,7 @@ class LuaState : public node::ObjectWrap {
         static NAN_METHOD(DoFile);
         static NAN_METHOD(DoString);
 
-        // Stack modifiers
+        // Stack operators
         static NAN_METHOD(Read);
         static NAN_METHOD(Pop);
         static NAN_METHOD(Push);
