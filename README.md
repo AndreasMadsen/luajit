@@ -40,7 +40,7 @@ state.close();
 
 To manipulate the state use the following methods:
 
-* [Compile Methods][#Compile-Methods] Compile and run a string or file
+* [Compile Methods](#Compile-Methods) Compile and run a string or file
 * [Stack Operators](#Stack-Operators) Push, pop, manipulate and read the Lua stack
 
 ### Compile Methods
