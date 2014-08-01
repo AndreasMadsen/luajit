@@ -31,7 +31,7 @@ print("Hallo from Lua")
 
 This module is not yet published, but you can of cause clone it:
 ```shell
-git clone https://github.com/AndreasMadsen/luajit.git
+git clone --recursive https://github.com/AndreasMadsen/luajit.git
 cd luajit
 npm install
 ```
