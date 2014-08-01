@@ -26,6 +26,10 @@ class LuaState : public node::ObjectWrap {
         static NAN_METHOD(New);
         static NAN_METHOD(Close);
 
+        // Global operators
+        static NAN_METHOD(GetGlobal);
+        static NAN_METHOD(SetGlobal);
+
         // Compile methods
         static NAN_METHOD(DoFile);
         static NAN_METHOD(DoString);

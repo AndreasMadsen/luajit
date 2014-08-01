@@ -50,6 +50,7 @@ state.close();
 To manipulate the state use the following methods:
 
 * [Compile Methods](#Compile-Methods) - Compile and run a string or file.
+* [Global Operators](#Global-Operators) - Read and write the global table.
 * [Stack Operators](#Stack-Operators) - Push, pop, manipulate and read the Lua stack.
 
 ### Compile Methods
@@ -58,8 +59,13 @@ Both methods compiles and run the code. When this is done the callback is called
 In case of errors (compile or runtime) the first argument in the callback will
 be an error object, otherwise it is `null`.
 
-* `LuaState.doFile(filepath, callback)` - Wraps `luaL_dofile`.
-* `LuaState.doString(code, callback)` - Wraps `luaL_dostring`.
+* `LuaState.doFile(filepath, callback)` - Wraps `luaL_dofile` and reports error.
+* `LuaState.doString(code, callback)` - Wraps `luaL_dostring` and reports error.
+
+### Global Operators
+
+* `LuaState.getGlobal(filepath, callback)` - Wraps `lua_getglobal`, push global value to stack.
+* `LuaState.setGlobal(code, callback)` - Wraps `lua_setglobal`, put top stack element to global and pop stack.
 
 ### Stack Operators
 

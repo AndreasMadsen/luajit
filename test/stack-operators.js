@@ -38,7 +38,7 @@ test('stack read', function (t) {
             state.read();
         } catch (e) { error = e; }
         t.equal(error.name, 'TypeError');
-        t.equal(error.message, 'LuaState.read requires 1 argument');
+        t.equal(error.message, 'LuaState.read first argument must be a number');
         state.close();
         t.end();
     });

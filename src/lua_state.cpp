@@ -30,6 +30,9 @@ void LuaState::Init (v8::Handle<v8::Object> target) {
     // Setup prototype
     NODE_SET_PROTOTYPE_METHOD(tpl, "close", LuaState::Close);
 
+    NODE_SET_PROTOTYPE_METHOD(tpl, "getGlobal", LuaState::GetGlobal);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "setGlobal", LuaState::SetGlobal);
+
     NODE_SET_PROTOTYPE_METHOD(tpl, "doFile", LuaState::DoFile);
     NODE_SET_PROTOTYPE_METHOD(tpl, "doString", LuaState::DoString);
 
@@ -68,6 +71,41 @@ NAN_METHOD(LuaState::Close) {
 
     NanReturnUndefined();
 };
+
+//
+// Global operators
+//
+NAN_METHOD(LuaState::GetGlobal) {
+    NanScope();
+
+    if (args.Length() < 1 || !args[0]->IsString()) {
+        v8::ThrowException(NanTypeError("LuaState.getGlobal first argument must be a string"));
+    } else {
+        LuaState* obj = node::ObjectWrap::Unwrap<LuaState>(args.This());
+        size_t count;
+        const char* string = NanCString(args[0], &count);
+        lua_getglobal(obj->L, string);
+        delete[] string;
+    }
+
+    NanReturnUndefined();
+}
+
+NAN_METHOD(LuaState::SetGlobal) {
+    NanScope();
+
+    if (args.Length() < 1 || !args[0]->IsString()) {
+        v8::ThrowException(NanTypeError("LuaState.setGlobal first argument must be a string"));
+    } else {
+        LuaState* obj = node::ObjectWrap::Unwrap<LuaState>(args.This());
+        size_t count;
+        const char* string = NanCString(args[0], &count);
+        lua_setglobal(obj->L, string);
+        delete[] string;
+    }
+
+    NanReturnUndefined();
+}
 
 //
 // Compile methods
@@ -131,8 +169,8 @@ NAN_METHOD(LuaState::Read) {
     NanScope();
     v8::Handle<v8::Value> value = NanUndefined();
 
-    if (args.Length() < 1) {
-        v8::ThrowException(NanTypeError("LuaState.read requires 1 argument"));
+    if (args.Length() < 1 || !args[0]->IsNumber()) {
+        v8::ThrowException(NanTypeError("LuaState.read first argument must be a number"));
     } else {
         bool supportedType;
         int index = (int)args[0]->ToNumber()->Value();
