@@ -87,8 +87,8 @@ If everything went fine then the first argument will be `null`.
 
 ### Global Operators
 
-* `LuaState.getGlobal(filepath, callback)` - Wraps `lua_getglobal`, push global value to stack.
-* `LuaState.setGlobal(code, callback)` - Wraps `lua_setglobal`, put top stack element to global and pop stack.
+* `LuaState.getGlobal(name)` - Wraps `lua_getglobal`, push global value to stack.
+* `LuaState.setGlobal(name)` - Wraps `lua_setglobal`, put top stack element to global and pop stack.
 
 ### Stack Operators
 
