@@ -65,9 +65,9 @@ state.close();
 
 To manipulate the state use the following methods:
 
-* [Execution Methods](#Compile-Methods) - Compile and run a string or file.
-* [Global Operators](#Global-Operators) - Read and write the global table.
-* [Stack Operators](#Stack-Operators) - Push, pop, manipulate and read the Lua stack.
+* [Execution Methods](#execution-methods) - Compile and run a string or file.
+* [Global Operators](#global-operators) - Read and write the global table.
+* [Stack Operators](#stack-operators) - Push, pop, manipulate and read the Lua stack.
 
 ### Execution Methods
 
