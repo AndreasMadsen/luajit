@@ -3,7 +3,6 @@
 #include "baton.h"
 #include "async.h"
 #include "lua_utils.h"
-#include <stdio.h>
 
 static v8::Persistent<v8::FunctionTemplate> luastate_constructor;
 
@@ -35,6 +34,7 @@ void LuaState::Init (v8::Handle<v8::Object> target) {
 
     NODE_SET_PROTOTYPE_METHOD(tpl, "doFile", LuaState::DoFile);
     NODE_SET_PROTOTYPE_METHOD(tpl, "doString", LuaState::DoString);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "call", LuaState::Call);
 
     NODE_SET_PROTOTYPE_METHOD(tpl, "read", LuaState::Read);
     NODE_SET_PROTOTYPE_METHOD(tpl, "push", LuaState::Push);
@@ -108,13 +108,15 @@ NAN_METHOD(LuaState::SetGlobal) {
 }
 
 //
-// Compile methods
+// Execution methods
 //
 void do_file(uv_work_t* req) {
-    Baton* baton = static_cast<Baton*>(req->data);
+    Baton<char>* baton = (Baton<char>*)(req->data);
 
     if (luaL_dofile(baton->L, baton->data)) {
-        baton->seterror(lua_tostring(baton->L, -1));
+        const char* msg = lua_tostring(baton->L, -1);
+        lua_pop(baton->L, 1);
+        baton->seterror(msg);
     }
 }
 
@@ -126,21 +128,26 @@ NAN_METHOD(LuaState::DoFile) {
     } else if (args.Length() < 2 || !args[1]->IsFunction()) {
         v8::ThrowException(NanTypeError("LuaState.doFile second argument must be a function"));
     } else {
-        Baton* baton = new Baton(args);
+        // Note that the c string will be freed by the Baton destructor
+        size_t datasize;
+        const char* userdata = NanCString(args[0], &datasize);
+        Baton<char>* baton = new Baton<char>(args, userdata, 1);
 
         uv_work_t *req = new uv_work_t;
         req->data = baton;
-        uv_queue_work(uv_default_loop(), req, do_file, async_after);
+        uv_queue_work(uv_default_loop(), req, do_file, async_after<char>);
     }
 
     NanReturnUndefined();
 }
 
-void do_string(uv_work_t* req) {
-    Baton* baton = static_cast<Baton*>(req->data);
+void do_dostring(uv_work_t* req) {
+    Baton<char>* baton = (Baton<char>*)(req->data);
 
     if (luaL_dostring(baton->L, baton->data)) {
-        baton->seterror(lua_tostring(baton->L, -1));
+        const char* msg = lua_tostring(baton->L, -1);
+        lua_pop(baton->L, 1);
+        baton->seterror(msg);
     }
 }
 
@@ -152,11 +159,46 @@ NAN_METHOD(LuaState::DoString) {
     } else if (args.Length() < 2 || !args[1]->IsFunction()) {
         v8::ThrowException(NanTypeError("LuaState.doString second argument must be a function"));
     } else {
-        Baton* baton = new Baton(args);
+        // Note that the c string will be freed by the Baton destructor
+        size_t datasize;
+        const char* userdata = NanCString(args[0], &datasize);
+        Baton<char>* baton = new Baton<char>(args, userdata, 1);
 
         uv_work_t *req = new uv_work_t;
         req->data = baton;
-        uv_queue_work(uv_default_loop(), req, do_string, async_after);
+        uv_queue_work(uv_default_loop(), req, do_dostring, async_after<char>);
+    }
+
+    NanReturnUndefined();
+}
+
+void do_pcall(uv_work_t* req) {
+    Baton<int>* baton = (Baton<int>*)(req->data);
+
+    if (lua_pcall(baton->L, baton->data[0], baton->data[1], 0)) {
+        const char* msg = lua_tostring(baton->L, -1);
+        lua_pop(baton->L, 1);
+        baton->seterror(msg);
+    }
+}
+
+NAN_METHOD(LuaState::Call) {
+    NanScope();
+
+    if (args.Length() < 1 || !args[0]->IsNumber()) {
+        v8::ThrowException(NanTypeError("LuaState.call first argument must be a number"));
+    } else if (args.Length() < 2 || !args[1]->IsNumber()) {
+        v8::ThrowException(NanTypeError("LuaState.call second argument must be a number"));
+    } else if (args.Length() < 3 || !args[2]->IsFunction()) {
+        v8::ThrowException(NanTypeError("LuaState.call thrid argument must be a function"));
+    } else {
+        // Note that the int array will be freed by the Baton destructor
+        int* userdata = new int[2] { (int)args[0]->ToNumber()->Value(), (int)args[1]->ToNumber()->Value() };
+        Baton<int>* baton = new Baton<int>(args, userdata, 2);
+
+        uv_work_t *req = new uv_work_t;
+        req->data = baton;
+        uv_queue_work(uv_default_loop(), req, do_pcall, async_after<int>);
     }
 
     NanReturnUndefined();

@@ -2,10 +2,11 @@
 #include "async.h"
 #include "baton.h"
 
+template <class T>
 void async_after(uv_work_t* req, int status) {
     NanScope();
 
-    Baton* baton = static_cast<Baton*>(req->data);
+    Baton<T>* baton = static_cast<Baton<T>*>(req->data);
 
     v8::Handle<v8::Value> argv[] = { NanNull() };
     if (baton->failed) {
@@ -16,3 +17,6 @@ void async_after(uv_work_t* req, int status) {
     delete baton;
     delete req;
 }
+
+template void async_after<char>(uv_work_t*, int);
+template void async_after<int>(uv_work_t*, int);

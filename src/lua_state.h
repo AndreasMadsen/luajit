@@ -33,6 +33,7 @@ class LuaState : public node::ObjectWrap {
         // Compile methods
         static NAN_METHOD(DoFile);
         static NAN_METHOD(DoString);
+        static NAN_METHOD(Call);
 
         // Stack operators
         static NAN_METHOD(Read);

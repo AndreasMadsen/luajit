@@ -16,15 +16,31 @@ var path = require('path');
 var luajit = require('luajit');
 
 var state = new luajit.LuaState();
-state.doFile(path.resolve(__dirname, 'example.lua'), function (error) {
-    if (error) throw error;
+state.doFile(path.resolve(__dirname, 'example.lua'), function (err) {
+    if (err) throw err;
+
+    state.getGlobal('addition');
+    state.push(5);
+    state.push(3);
+    state.call(2, 1, function (err) {
+        // The error was caught and have been converted intro a Error object.
+        // Furemore the error message have been poped from the Lua stack, so
+        // you propagate without worrying.
+        if (err) throw err;
+
+        console.log(state.read(-1)); // print 8
+        state.pop(1); // lets be nice and cleanup the returned value
+
+        state.close();
+    });
 });
-state.close();
 ```
 
 **example.lua**
 ```lua
-print("Hallo from Lua")
+function addition (x,y)
+    return x+y
+end
 ```
 
 ### Install
@@ -49,18 +65,25 @@ state.close();
 
 To manipulate the state use the following methods:
 
-* [Compile Methods](#Compile-Methods) - Compile and run a string or file.
+* [Execution Methods](#Compile-Methods) - Compile and run a string or file.
 * [Global Operators](#Global-Operators) - Read and write the global table.
 * [Stack Operators](#Stack-Operators) - Push, pop, manipulate and read the Lua stack.
 
-### Compile Methods
+### Execution Methods
 
-Both methods compiles and run the code. When this is done the callback is called.
-In case of errors (compile or runtime) the first argument in the callback will
-be an error object, otherwise it is `null`.
+Both `LuaState.doFile` and `LuaState.doString` compiles and run the code. When
+this is done you can call a function using `LuaState.call`.
+
+All these functions will report any error (compile or runtime) as the first
+argument in the callback. If there was an error the error message will also have
+been poped from the Lua stack, this is to allow you to easily propergate the
+error object without worrying about leaking the error message.
+
+If everything went fine then the first argument will be `null`.
 
 * `LuaState.doFile(filepath, callback)` - Wraps `luaL_dofile` and reports error.
 * `LuaState.doString(code, callback)` - Wraps `luaL_dostring` and reports error.
+* `LuaState.call(params, returns, callback)` - Wraps `lua_pcall` and reports error.
 
 ### Global Operators
 
@@ -71,6 +94,7 @@ be an error object, otherwise it is `null`.
 
 * `value = LuaState.read(index)` - get a Lua by stack index and convert it to a v8 type.
 * `LuaState.push(value)` - convert a v8 value to Lua and push it to the Lua stack.
+* `LuaState.pop(length)` - Wraps `lua_pop`, pop `length` elements from the top of the stack.
 * `length = LuaState.getTop()` - Wraps `lua_gettop`, returns the stack length.
 * `LuaState.setTop(length)` - Wraps `Lua_settop`, set the stack length.
 * `LuaState.pushValue(index)` - Wraps `lua_pushvalue`, push a copy of the given value by stack index.
