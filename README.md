@@ -23,7 +23,7 @@ state.doFile(path.resolve(__dirname, 'example.lua'), function (err) {
     state.push(5);
     state.push(3);
     state.call(2, 1, function (err) {
-        // The error was caught and have been converted intro a Error object.
+        // Any error will be caught and then converted intro a Error object.
         // Furemore the error message have been poped from the Lua stack, so
         // you propagate without worrying.
         if (err) throw err;
